@@ -1,37 +1,40 @@
 from django.contrib import admin
 
-from .models import Tag, Ingredient, Recipes, IngredientRecipes
+from .models import (Favorite, Ingredient, Recipe, IngredientRecipes,
+                     ShoppingList, Tag)
+
+
+class RecipeIngredientInline(admin.TabularInline):
+    model = IngredientRecipes
+    extra = 1
+    min_num = 1
+
+
+class RecipeAdmin(admin.ModelAdmin):
+    inlines = [RecipeIngredientInline]
+    list_display = ('name', 'author', 'favorites_count')
+    search_fields = ('name',)
+    list_filter = ('name', 'author', 'tags')
+    exclude = ('ingredients',)
+
+    def favorites_count(self, obj):
+        return obj.favorites.count()
 
 
 class TagAdmin(admin.ModelAdmin):
-    prepopulated_fields = {'slug': ('name',)}
+    list_display = ('name', 'color', 'slug')
+    list_filter = ('name', 'slug')
+    search_fields = ('name', 'slug')
 
 
-"""class IngredientInLine(admin.TabularInline):
-    model = Recipes.ingredients.through
+class IngredientsAdmin(admin.ModelAdmin):
+    list_display = ('name',)
+    list_filter = ('name',)
+    search_fields = ('name',)
 
 
-class RecipesAdmin(admin.ModelAdmin):
-    inlines = [IngredientInLine]"""
-
-
-class IngredientRecipesLine(admin.TabularInline):
-    model = IngredientRecipes
-    extra = 1
-
-
-class RecipesAdmin(admin.ModelAdmin):
-    inlines = (IngredientRecipesLine,)
-
-
-class IngredientRecipesAdmin(admin.ModelAdmin):
-    inlines = (IngredientRecipesLine,)
-
-
+admin.site.register(Recipe, RecipeAdmin)
+admin.site.register(Ingredient, IngredientsAdmin)
 admin.site.register(Tag, TagAdmin)
-admin.site.register(Ingredient)
-# admin.site.register(Recipes, RecipesAdmin)
-admin.site.register(Recipes)
-# admin.site.register(IngredientRecipes, IngredientRecipesAdmin)
-admin.site.register(IngredientRecipes)
-admin.site.empty_value_display = 'Не задано'
+admin.site.register(ShoppingList)
+admin.site.register(Favorite)

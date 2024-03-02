@@ -1,6 +1,9 @@
+# from django import forms
 from django.contrib import admin
+# from django.contrib.auth.admin import UserAdmin
+from django.contrib.auth.models import Group
 
-from .models import User
+from .models import Follow, User
 
 
 class CastomUserAdmin(admin.ModelAdmin):
@@ -26,4 +29,6 @@ class CastomUserAdmin(admin.ModelAdmin):
 
 
 admin.site.register(User, CastomUserAdmin)
+admin.site.register(Follow)
+admin.site.unregister(Group)
 admin.site.empty_value_display = 'Не задано'
