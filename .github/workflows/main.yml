@@ -67,7 +67,7 @@ jobs:
           # Для каждого пересобранного образа 
           # устанавливаем тег latest, чтобы потом
           # на сервере и в docker-compose.yml не указывать версию
-          tags: ${{ secrets.DOCKER_USERNAME }}/foodgram_backend:latest
+          tags: egorivanov1/foodgram_backend:latest
   
   frontend_tests:
     runs-on: ubuntu-latest
@@ -111,7 +111,7 @@ jobs:
         with:
           context: ./frontend/
           push: true
-          tags: ${{ secrets.DOCKER_USERNAME }}/foodgram_frontend:latest
+          tags: egorivanov1/foodgram_frontend:latest
   
    build_gateway_and_push_to_docker_hub:
     name: Push gateway Docker image to DockerHub
@@ -132,4 +132,4 @@ jobs:
           context: ./gateway/
           push: true
           # Тут вместо username должен быть ваш логин на Docker Hub
-          tags: ${{ secrets.DOCKER_USERNAME }}/baskend_gateway:latest 
+          tags: egorivanov1/baskend_gateway:latest 
