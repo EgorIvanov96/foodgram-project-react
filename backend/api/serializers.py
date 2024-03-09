@@ -9,8 +9,10 @@ from reviews.models import (Favorite, Ingredient, Recipe, IngredientRecipes,
                             ShoppingList, Tag)
 from users.models import Follow, User
 
+from .utils import subscribed_check, validate_create_serializer
 
-class TagSerializer(serializers.ModelSerializer):
+
+class TagSerializer(UserSerializer):
     class Meta:
         model = Tag
         fields = (
@@ -27,7 +29,7 @@ class IngredientSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 
-class CustomUserSerializer(UserSerializer):
+class CustomUserSerializer(serializers.ModelSerializer):
     is_subscribed = serializers.SerializerMethodField(read_only=True)
 
     class Meta:
@@ -39,8 +41,12 @@ class CustomUserSerializer(UserSerializer):
             'first_name',
             'last_name',
             'is_subscribed',
-            'password'
+            # 'password'
         )
+
+    def get_is_subscribed(self, instance):
+        request = self.context.get('request')
+        return subscribed_check(request, instance)
 
 
 class CustomUserCreateSerializer(UserCreateSerializer):
@@ -97,6 +103,21 @@ class RecipeListSerializer(serializers.ModelSerializer):
     tags = TagSerializer(many=True)
     image = Base64ImageField(required=True)
 
+    class Meta:
+        model = Recipe
+        fields = (
+            'id',
+            'author',
+            'name',
+            'image',
+            'text',
+            'ingredients',
+            'tags',
+            'cooking_time',
+            'is_in_shopping_cart',
+            'is_favorited'
+        )
+
     def get_is_favorited(self, instance):
         request = self.context.get('request')
         if not request:
@@ -110,21 +131,6 @@ class RecipeListSerializer(serializers.ModelSerializer):
         return (request.user.is_authenticated and ShoppingList.objects.filter(
             user=request.user, recipe=instance
         ).exists())
-
-    class Meta:
-        model = Recipe
-        fields = (
-            'id',
-            'author',
-            'name',
-            'image',
-            'text',
-            'ingredients',
-            'tags',
-            'cooking_time',
-            'is_in_shopping_cart',
-            'is_favorited',
-        )
 
 
 class IngredientCreateInRecipeSerializer(serializers.ModelSerializer):
@@ -278,6 +284,10 @@ class FollowSerializer(serializers.ModelSerializer):
     def get_recipes_count(self, instance):
         return Recipe.objects.filter(author__id=instance.id).count()
 
+    def get_is_subscribed(self, instance):
+        request = self.context.get('request')
+        return subscribed_check(request, instance)
+
 
 class FollowCreateSerializer(serializers.ModelSerializer):
     user = serializers.SlugRelatedField(
@@ -320,20 +330,9 @@ class FavoriteCreateSerializer(serializers.ModelSerializer):
         fields = ('user', 'recipe')
 
     def validate(self, data):
-        favorite = Favorite.objects.filter(
-            user=self.context.get('request').user,
-            recipe=data['recipe'].id
-        )
-        if self.context.get('request').method == 'POST':
-            if favorite.exists():
-                raise serializers.ValidationError(
-                    'Рецепт уже добавлен в избранное.'
-                )
-        if self.context.get('request').method == 'DELETE':
-            if not favorite.exists():
-                raise serializers.ValidationError(
-                    'Рецепт не добавлен в избранное.'
-                )
+        user = self.context['request'].user
+        context = self.context
+        validate_create_serializer(user, data, Favorite, context)
         return data
 
     def create(self, validated_data):
@@ -349,20 +348,9 @@ class ShoppingListCreateSerializer(serializers.ModelSerializer):
         fields = ('user', 'recipe')
 
     def validate(self, data):
-        shopping_cart = ShoppingList.objects.filter(
-            user=self.context.get('request').user,
-            recipe=data['recipe'].id
-        )
-        if self.context.get('request').method == 'POST':
-            if shopping_cart.exists():
-                raise serializers.ValidationError(
-                    'Рецепт уже добавлен в корзину.'
-                )
-        if self.context.get('request').method == 'DELETE':
-            if not shopping_cart.exists():
-                raise serializers.ValidationError(
-                    'Рецепт не добавлен в корзину.'
-                )
+        user = self.context['request'].user
+        context = self.context
+        validate_create_serializer(user, data, ShoppingList, context)
         return data
 
     def create(self, validated_data):

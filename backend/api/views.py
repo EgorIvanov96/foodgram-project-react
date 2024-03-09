@@ -12,12 +12,12 @@ from rest_framework.response import Response
 from reviews.models import (Favorite, Ingredient, Recipe, IngredientRecipes,
                             ShoppingList, Tag)
 from users.models import Follow, User
-# from .filters import IngredientFilter, RecipeFilter
 from .serializers import (CustomUserSerializer, FavoriteCreateSerializer,
                           FollowCreateSerializer, FollowSerializer,
                           IngredientSerializer, RecipeCreateUpdateSerializer,
                           RecipeListSerializer, ShoppingListCreateSerializer,
                           TagSerializer)
+from .filters import RecipeFilter, IngredientFilter
 
 
 class CustomPaginator(pagination.PageNumberPagination):
@@ -98,7 +98,7 @@ class IngredientViewSet(viewsets.ModelViewSet):
     pagination_class = None
     permission_classes = (AllowAny,)
     filter_backends = (DjangoFilterBackend,)
-    # filterset_class = IngredientFilter
+    filterset_class = IngredientFilter
 
 
 class RecipeViewSet(viewsets.ModelViewSet):
@@ -106,7 +106,7 @@ class RecipeViewSet(viewsets.ModelViewSet):
     permission_classes = (IsAuthenticatedOrReadOnly,)
     pagination_class = CustomPaginator
     filter_backends = (DjangoFilterBackend,)
-    # filterset_class = RecipeFilter
+    filterset_class = RecipeFilter
 
     """def perform_update(self, serializer):
         serializer.save(author=self.request.user)"""

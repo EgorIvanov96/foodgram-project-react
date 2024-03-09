@@ -1,6 +1,5 @@
 from typing import Optional
 
-from django.core.validators import MinValueValidator, validate_slug
 from django.db import models
 
 from users.models import User
@@ -73,9 +72,9 @@ class Recipe(models.Model):
                             blank=False,
                             help_text='Введите название рецепта')
     image = models.ImageField(verbose_name='Изображение',
-                              upload_to='recipes',
+                              upload_to='recipes/',
                               blank=False,
-                              help_text='Прикрепите фото рецепта2')
+                              help_text='Прикрепите фото рецепта')
     text = models.TextField(verbose_name='Описание рецепта',
                             blank=False,
                             help_text='Введите описание рецепта')
