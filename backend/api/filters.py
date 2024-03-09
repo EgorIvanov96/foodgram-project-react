@@ -1,16 +1,17 @@
-from django_filters import rest_framework as filters
+from django_filters import CharFilter, AllValuesMultipleFilter, BooleanFilter
+from django_filters.rest_framework import FilterSet
 
 from reviews.models import Recipe, Ingredient
 
 
-class RecipeFilter(filters.FilterSet):
+class RecipeFilter(FilterSet):
     """Фильтр по рецептам."""
-    tags = filters.AllValuesMultipleFilter(field_name='tags__slug')
-    is_favorited = filters.BooleanFilter(method='get_is_favorited')
-    is_in_shopping_cart = filters.BooleanFilter(
+    tags = AllValuesMultipleFilter(field_name='tags__slug')
+    is_favorited = BooleanFilter(method='get_is_favorited')
+    is_in_shopping_cart = BooleanFilter(
         method='get_is_in_shopping_cart'
     )
-    author = filters.CharFilter(field_name='author__id')
+    author = CharFilter(field_name='author__id')
 
     class Meta:
         model = Recipe
@@ -27,9 +28,9 @@ class RecipeFilter(filters.FilterSet):
         return queryset
 
 
-class IngredientFilter(filters.FilterSet):
+class IngredientFilter(FilterSet):
     """Фильтр по ингредиентам."""
-    name = filters.CharFilter(field_name='name', lookup_expr='startswith')
+    name = CharFilter(field_name='name', lookup_expr='startswith')
 
     class Meta:
         model = Ingredient

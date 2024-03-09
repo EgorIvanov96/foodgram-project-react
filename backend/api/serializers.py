@@ -4,7 +4,6 @@ from django.core.validators import MinValueValidator
 from djoser.serializers import UserCreateSerializer, UserSerializer
 from drf_base64.fields import Base64ImageField
 from rest_framework import serializers
-
 from reviews.models import (Favorite, Ingredient, Recipe, IngredientRecipes,
                             ShoppingList, Tag)
 from users.models import Follow, User
