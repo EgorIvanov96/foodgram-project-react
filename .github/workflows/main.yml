@@ -1,4 +1,4 @@
-name: Main Fooggram workflow
+name: Master Fooggram workflow
 
 on:
   push:

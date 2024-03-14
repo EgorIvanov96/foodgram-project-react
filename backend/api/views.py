@@ -33,7 +33,7 @@ class UserCustomViewSet(UserViewSet):
 
     @action(
         detail=False,
-        methods=['get',],
+        methods=['get'],
         permission_classes=(IsAuthenticated,),
         url_path='subscriptions',
     )
