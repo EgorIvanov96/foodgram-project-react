@@ -30,7 +30,7 @@ SECRET_KEY = os.getenv('SECRET_KEY')
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['130.193.42.81', '127.0.0.1', 'localhost', 'foogram.ddns.net']
+ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS').split(', ')
 
 # Application definition
 
