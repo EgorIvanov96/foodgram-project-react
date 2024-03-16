@@ -1,4 +1,4 @@
-from django_filters import CharFilter, AllValuesMultipleFilter, BooleanFilter
+from django_filters import CharFilter, BooleanFilter
 from django_filters.rest_framework import FilterSet, filters
 
 from reviews.models import Recipe, Ingredient, Tag
