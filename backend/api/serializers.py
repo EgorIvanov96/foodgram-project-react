@@ -321,7 +321,7 @@ class FollowCreateSerializer(serializers.ModelSerializer):
 
 class FavoriteCreateSerializer(serializers.ModelSerializer):
     user = serializers.PrimaryKeyRelatedField(read_only=True)
-    recipe = serializers.PrimaryKeyRelatedField(read_only=True)
+    recipe = serializers.PrimaryKeyRelatedField(queryset=Recipe.objects.all())
 
     class Meta:
         model = Favorite
