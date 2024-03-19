@@ -16,7 +16,7 @@ class RecipeFilter(FilterSet):
     is_in_shopping_cart = BooleanFilter(
         method='get_is_in_shopping_cart'
     )
-    # author = CharFilter(field_name='author__id')
+    author = CharFilter(field_name='author__id')
 
     class Meta:
         model = Recipe
