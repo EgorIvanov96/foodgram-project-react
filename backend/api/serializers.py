@@ -158,6 +158,19 @@ class RecipeCreateUpdateSerializer(serializers.ModelSerializer):
         ),)
     )
 
+    class Meta:
+        model = Recipe
+        fields = (
+            'id',
+            'tags',
+            'author',
+            'ingredients',
+            'name',
+            'image',
+            'text',
+            'cooking_time'
+        )
+
     def validate(self, date):
         ingredients = self.initial_data.get('ingredients')
         tags = self.initial_data.get('tags')
@@ -222,19 +235,6 @@ class RecipeCreateUpdateSerializer(serializers.ModelSerializer):
             IngredientRecipes.objects.filter(recipe=instance).all(), many=True
         ).data
         return representation
-
-    class Meta:
-        model = Recipe
-        fields = (
-            'id',
-            'tags',
-            'author',
-            'ingredients',
-            'name',
-            'image',
-            'text',
-            'cooking_time'
-        )
 
 
 class RecipeShortSerializer(serializers.ModelSerializer):
@@ -353,3 +353,21 @@ class ShoppingListCreateSerializer(serializers.ModelSerializer):
 
     def create(self, validated_data):
         return ShoppingList.objects.create(**validated_data)
+
+
+class FavoriteRecipeSerializer(serializers.ModelSerializer):
+    """Сериализатор для получения рецепта из избранного."""
+
+    class Meta:
+        model = Recipe
+        fields = (
+            'id',
+            'name',
+            'image',
+            'cooking_time'
+        )
+        read_only_fields = (
+            'name',
+            'image',
+            'cooking_time'
+        )
