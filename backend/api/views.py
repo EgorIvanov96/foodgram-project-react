@@ -114,7 +114,8 @@ class RecipeViewSet(viewsets.ModelViewSet):
             return RecipeCreateUpdateSerializer
         return RecipeListSerializer
 
-    @action(detail=True, methods=('post', 'delete'),
+    @action(detail=True, url_path='favorites',
+            methods=('post', 'delete'),
             permission_classes=(IsAuthenticated,))
     def favorite(self, request, pk=None):
         """Метод для добавления и удаления рецепта в избранное."""
@@ -138,7 +139,8 @@ class RecipeViewSet(viewsets.ModelViewSet):
             Favorite.objects.filter(user=user, recipe=recipe).delete()
             return Response(status=status.HTTP_204_NO_CONTENT)
 
-    @action(detail=True, methods=('post', 'delete'),
+    @action(detail=True, url_path='cart',
+            methods=('post', 'delete'),
             permission_classes=(IsAuthenticated,))
     def shopping_cart(self, request, pk=None):
         """Метод для добавления и удаления рецепта в список покупок."""
