@@ -119,7 +119,7 @@ class RecipeViewSet(viewsets.ModelViewSet):
             permission_classes=(IsAuthenticated,))
     def favorite(self, request, pk=None):
         """Метод для добавления и удаления рецепта в избранное."""
-        user = request.user
+        user = self.request.user
         recipe = get_object_or_404(Recipe, pk=pk)
         serializer = FavoriteRecipeSerializer(
             recipe,
@@ -145,7 +145,7 @@ class RecipeViewSet(viewsets.ModelViewSet):
     def shopping_cart(self, request, pk=None):
         """Метод для добавления и удаления рецепта в список покупок."""
         recipe = get_object_or_404(Recipe, pk=pk)
-        user = request.user
+        user = self.request.user
         serializer = FavoriteRecipeSerializer(
             recipe,
             data=request.data,
