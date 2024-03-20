@@ -115,7 +115,7 @@ class RecipeViewSet(viewsets.ModelViewSet):
         return RecipeCreateUpdateSerializer
 
     @action(detail=True, url_path='favorites',
-            methods=('post', 'delete'),
+            methods=('post', 'delete', 'get'),
             permission_classes=(IsAuthenticated,))
     def favorite(self, request, pk=None):
         """Метод для добавления и удаления рецепта в избранное."""
@@ -138,6 +138,10 @@ class RecipeViewSet(viewsets.ModelViewSet):
         if request.method == 'DELETE':
             Favorite.objects.filter(user=user, recipe=recipe).delete()
             return Response(status=status.HTTP_204_NO_CONTENT)
+        if request.method == 'GET':
+            return Recipe.objects.filter(
+                user_favorites=self.request.user.pk
+            )
 
     @action(detail=True, url_path='cart',
             methods=('post', 'delete'),
