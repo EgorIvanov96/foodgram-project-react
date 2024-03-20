@@ -105,14 +105,14 @@ class IngredientViewSet(viewsets.ModelViewSet):
 class RecipeViewSet(viewsets.ModelViewSet):
     queryset = Recipe.objects.all()
     permission_classes = (IsAuthenticatedOrReadOnly,)
-    # pagination_class = CustomPaginator
+    pagination_class = CustomPaginator
     filter_backends = (DjangoFilterBackend,)
     filterset_class = RecipeFilter
 
     def get_serializer_class(self):
-        if self.action in ('create', 'update', 'partial_update'):
-            return RecipeCreateUpdateSerializer
-        return RecipeListSerializer
+        if self.request.method == 'GET':
+            return RecipeListSerializer
+        return RecipeCreateUpdateSerializer
 
     @action(detail=True, url_path='favorites',
             methods=('post', 'delete'),
