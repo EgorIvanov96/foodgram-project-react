@@ -19,6 +19,7 @@ from .serializers import (CustomUserSerializer,
                           RecipeListSerializer,
                           TagSerializer, FavoriteRecipeSerializer)
 from .filters import RecipeFilter, IngredientFilter
+from .permissions import IsAuthorOrReadOnly
 
 
 class CustomPaginator(pagination.PageNumberPagination):
@@ -114,8 +115,18 @@ class RecipeViewSet(viewsets.ModelViewSet):
             return RecipeListSerializer
         return RecipeCreateUpdateSerializer
 
-    @action(detail=True, url_path='favorites',
-            methods=('post', 'delete', 'get'),
+    def get_permissions(self):
+        """Распределение прав на действия."""
+        if self.action in (
+            'favorite',
+            'shopping_cart',
+            'download_shopping_cart',
+        ):
+            return (IsAuthenticated(),)
+        return (IsAuthorOrReadOnly(),)
+
+    @action(detail=True,
+            methods=('post', 'delete'),
             permission_classes=(IsAuthenticated,))
     def favorite(self, request, pk=None):
         """Метод для добавления и удаления рецепта в избранное."""
@@ -139,7 +150,7 @@ class RecipeViewSet(viewsets.ModelViewSet):
             Favorite.objects.filter(user=user, recipe=recipe).delete()
             return Response(status=status.HTTP_204_NO_CONTENT)
 
-    @action(detail=True, url_path='cart',
+    @action(detail=True,
             methods=('post', 'delete'),
             permission_classes=(IsAuthenticated,))
     def shopping_cart(self, request, pk=None):

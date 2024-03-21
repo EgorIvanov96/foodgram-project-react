@@ -10,7 +10,6 @@ class RecipeFilter(FilterSet):
     """
     Фильтр для рецептов.
     """
-
     is_in_shopping_cart = BooleanFilter(method="filter_by_shopping_cart")
     is_favorited = BooleanFilter(method="filter_by_favorited")
     author = ModelChoiceFilter(queryset=User.objects.all())
