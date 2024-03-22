@@ -118,7 +118,7 @@ class RecipeListSerializer(serializers.ModelSerializer):
 
     def get_is_favorited(self, obj):
         """Проверяет есть ли рецепт в избранном."""
-        user = self.context.get('request').user
+        user = self.context.get('request')
         if user.is_anonymous:
             return False
         return Favorite.objects.filter(
@@ -127,7 +127,7 @@ class RecipeListSerializer(serializers.ModelSerializer):
 
     def get_is_in_shopping_cart(self, obj):
         """Проверяет есть ли рецепт в списке покупок."""
-        user = self.context.get('request').user
+        user = self.context.get('request')
         if user.is_anonymous:
             return False
         return ShoppingList.objects.filter(
@@ -340,6 +340,10 @@ class FavoriteCreateSerializer(serializers.ModelSerializer):
     def create(self, validated_data):
         return Favorite.objects.create(**validated_data)
 
+    def to_representation(self, instance):
+        return RecipeShortSerializer(instance.recipe,
+                                     context=self.context).data
+
 
 class ShoppingListCreateSerializer(serializers.ModelSerializer):
     user = serializers.PrimaryKeyRelatedField(read_only=True)
@@ -357,6 +361,13 @@ class ShoppingListCreateSerializer(serializers.ModelSerializer):
 
     def create(self, validated_data):
         return ShoppingList.objects.create(**validated_data)
+
+    def to_representation(self, instance):
+        return RecipeShortSerializer(instance.recipe,
+                                     context=self.context).data
+
+
+
 
 
 class FavoriteRecipeSerializer(serializers.ModelSerializer):

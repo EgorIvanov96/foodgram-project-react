@@ -17,7 +17,9 @@ from .serializers import (CustomUserSerializer,
                           FollowCreateSerializer, FollowSerializer,
                           IngredientSerializer, RecipeCreateUpdateSerializer,
                           RecipeListSerializer,
-                          TagSerializer, FavoriteRecipeSerializer)
+                          TagSerializer,
+                          FavoriteCreateSerializer,
+                          ShoppingListCreateSerializer)
 from .filters import RecipeFilter, IngredientFilter
 from .permissions import IsAuthorOrReadOnly
 
@@ -115,63 +117,40 @@ class RecipeViewSet(viewsets.ModelViewSet):
             return RecipeListSerializer
         return RecipeCreateUpdateSerializer
 
-    def get_permissions(self):
-        """Распределение прав на действия."""
-        if self.action in (
-            'favorite',
-            'shopping_cart',
-            'download_shopping_cart',
-        ):
-            return (IsAuthenticated(),)
-        return (IsAuthorOrReadOnly(),)
-
-    @action(detail=True,
-            methods=['post', 'delete'],
+    @action(detail=True, methods=['POST', 'DELETE'],
             permission_classes=(IsAuthenticated,))
-    def favorite(self, request, pk=None):
-        """Метод для добавления и удаления рецепта в избранное."""
-        user = self.request.user
-        recipe = get_object_or_404(Recipe, pk=pk)
-        serializer = FavoriteRecipeSerializer(
-            recipe,
-            data=request.data,
-            context={
-                'request': request,
-                'action_name': 'favorite'
-            }
-        )
+    def favorite(self, request, **kwargs):
+        recipe = get_object_or_404(Recipe, id=kwargs['pk'])
         if request.method == 'POST':
-            if serializer.is_valid():
-                Favorite.objects.create(user=user, recipe=recipe)
-                return Response(
-                    serializer.data, status=status.HTTP_201_CREATED
-                )
-        if request.method == 'DELETE':
-            Favorite.objects.filter(user=user, recipe=recipe).delete()
-            return Response(status=status.HTTP_204_NO_CONTENT)
+            serializer = FavoriteCreateSerializer(
+                data={'user': request.user.id,
+                      'recipe': recipe.id},
+                context={'request': request},
+            )
+            serializer.is_valid(raise_exception=True)
+            serializer.save(user=request.user, recipe=recipe)
+            return Response(serializer.data,
+                            status=status.HTTP_201_CREATED)
+        get_object_or_404(Favorite, user=request.user,
+                          recipe=recipe).delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
 
-    @action(detail=True,
-            methods=['post', 'delete'],
+    @action(detail=True, methods=['POST', 'DELETE'],
             permission_classes=(IsAuthenticated,))
-    def shopping_cart(self, request, pk=None):
-        """Метод для добавления и удаления рецепта в список покупок."""
-        recipe = get_object_or_404(Recipe, pk=pk)
-        user = self.request.user
-        serializer = FavoriteRecipeSerializer(
-            recipe,
-            data=request.data,
-            context={
-                'request': request,
-                'action_name': 'shopping_cart'
-            }
-        )
-        if request.method == 'POST' and serializer.is_valid():
-            ShoppingList.objects.create(user=user, recipe=recipe)
+    def shopping_cart(self, request, **kwargs):
+        recipe = get_object_or_404(Recipe, id=kwargs['pk'])
+        if request.method == 'POST':
+            serializer = ShoppingListCreateSerializer(
+                data={'user': request.user.id,
+                      'recipe': recipe.id},
+                context={'request': request,
+                         'recipe': recipe})
+            serializer.is_valid(raise_exception=True)
+            serializer.save(user=request.user, recipe=recipe)
             return Response(serializer.data, status=status.HTTP_201_CREATED)
-
-        if request.method == 'DELETE':
-            ShoppingList.objects.filter(user=user, recipe=recipe).delete()
-            return Response(status=status.HTTP_204_NO_CONTENT)
+        get_object_or_404(ShoppingList, user=request.user,
+                          recipe=recipe).delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
 
     @action(
         detail=False,
