@@ -367,9 +367,6 @@ class ShoppingListCreateSerializer(serializers.ModelSerializer):
                                      context=self.context).data
 
 
-
-
-
 class FavoriteRecipeSerializer(serializers.ModelSerializer):
     """Сериализатор для получения рецепта из избранного."""
 

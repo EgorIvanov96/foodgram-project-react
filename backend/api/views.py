@@ -21,7 +21,7 @@ from .serializers import (CustomUserSerializer,
                           FavoriteCreateSerializer,
                           ShoppingListCreateSerializer)
 from .filters import RecipeFilter, IngredientFilter
-from .permissions import IsAuthorOrReadOnly
+# from .permissions import IsAuthorOrReadOnly
 
 
 class CustomPaginator(pagination.PageNumberPagination):
