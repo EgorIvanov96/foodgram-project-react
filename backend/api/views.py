@@ -104,10 +104,7 @@ class IngredientViewSet(viewsets.ModelViewSet):
 
 
 class RecipeViewSet(viewsets.ModelViewSet):
-    queryset = (
-        Recipe.objects.select_related('author')
-        .prefetch_related('tags', 'ingredients').all()
-    )
+    queryset = Recipe.objects.all()
     permission_classes = (IsAuthenticatedOrReadOnly,)
     pagination_class = CustomPaginator
     filter_backends = (DjangoFilterBackend,)
@@ -129,7 +126,7 @@ class RecipeViewSet(viewsets.ModelViewSet):
         return (IsAuthorOrReadOnly(),)
 
     @action(detail=True,
-            methods=('post', 'delete'),
+            methods=['post', 'delete'],
             permission_classes=(IsAuthenticated,))
     def favorite(self, request, pk=None):
         """Метод для добавления и удаления рецепта в избранное."""
@@ -154,7 +151,7 @@ class RecipeViewSet(viewsets.ModelViewSet):
             return Response(status=status.HTTP_204_NO_CONTENT)
 
     @action(detail=True,
-            methods=('post', 'delete'),
+            methods=['post', 'delete'],
             permission_classes=(IsAuthenticated,))
     def shopping_cart(self, request, pk=None):
         """Метод для добавления и удаления рецепта в список покупок."""
