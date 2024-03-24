@@ -1,4 +1,4 @@
-from django_filters import CharFilter, BooleanFilter, ModelMultipleChoiceFilter
+from django_filters.rest_framework import filters
 from django_filters.rest_framework import FilterSet
 
 from reviews.models import Recipe, Ingredient, Tag
@@ -6,7 +6,7 @@ from reviews.models import Recipe, Ingredient, Tag
 
 class IngredientFilter(FilterSet):
     """Фильтр по ингредиентам."""
-    name = CharFilter(field_name='name', lookup_expr='startswith')
+    name = filters.CharFilter(field_name='name', lookup_expr='startswith')
 
     class Meta:
         model = Ingredient
@@ -14,14 +14,14 @@ class IngredientFilter(FilterSet):
 
 
 class RecipeFilter(FilterSet):
-    tags = ModelMultipleChoiceFilter(
+    tags = filters.ModelMultipleChoiceFilter(
         field_name='tags__slug',
         to_field_name='slug',
         queryset=Tag.objects.all()
     )
-    is_favorited = BooleanFilter(
+    is_favorited = filters.BooleanFilter(
         method='filter_by_favorited')
-    is_in_shopping_cart = BooleanFilter(
+    is_in_shopping_cart = filters.BooleanFilter(
         method='filter_by_shopping_cart')
 
     class Meta:

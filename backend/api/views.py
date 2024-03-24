@@ -147,7 +147,9 @@ class RecipeViewSet(viewsets.ModelViewSet):
             serializer.is_valid(raise_exception=True)
             serializer.save()
             shopping_cart_serializer = RecipeListSerializer(recipe)
-            return Response(shopping_cart_serializer.data, status=status.HTTP_201_CREATED)
+            return Response(
+                shopping_cart_serializer.data, status=status.HTTP_201_CREATED
+            )
         get_object_or_404(ShoppingList, user=request.user,
                           recipe=recipe).delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
