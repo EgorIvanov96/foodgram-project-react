@@ -4,11 +4,14 @@ from django.core.validators import MinValueValidator
 from djoser.serializers import UserCreateSerializer, UserSerializer
 from drf_base64.fields import Base64ImageField
 from rest_framework import serializers
+# from django.core.exceptions import ValidationError
 from reviews.models import (Favorite, Ingredient, Recipe, IngredientRecipes,
                             ShoppingList, Tag)
 from users.models import Follow, User
 
 from .utils import subscribed_check, validate_create_serializer
+
+# validate_create_serializer
 
 
 class TagSerializer(UserSerializer):
@@ -116,23 +119,19 @@ class RecipeListSerializer(serializers.ModelSerializer):
             'is_favorited'
         )
 
-    def get_is_favorited(self, obj):
-        """Проверяет есть ли рецепт в избранном."""
-        user = self.context.get('request')
-        if user.is_anonymous:
+    def get_is_favorited(self, instance):
+        request = self.context.get('request')
+        if not request:
             return False
-        return Favorite.objects.filter(
-            user=user, recipe=obj
-        ).exists()
+        return (request.user.is_authenticated and Favorite.objects.filter(
+            user=request.user, recipe=instance
+        ).exists())
 
-    def get_is_in_shopping_cart(self, obj):
-        """Проверяет есть ли рецепт в списке покупок."""
-        user = self.context.get('request')
-        if user.is_anonymous:
-            return False
-        return ShoppingList.objects.filter(
-            user=user, recipe=obj
-        ).exists()
+    def get_is_in_shopping_cart(self, instance):
+        request = self.context.get('request')
+        return (request.user.is_authenticated and ShoppingList.objects.filter(
+            user=request.user, recipe=instance
+        ).exists())
 
 
 class IngredientCreateInRecipeSerializer(serializers.ModelSerializer):
@@ -324,8 +323,6 @@ class FollowCreateSerializer(serializers.ModelSerializer):
 
 
 class FavoriteCreateSerializer(serializers.ModelSerializer):
-    user = serializers.PrimaryKeyRelatedField(read_only=True)
-    recipe = serializers.PrimaryKeyRelatedField(queryset=Recipe.objects.all())
 
     class Meta:
         model = Favorite
@@ -337,17 +334,12 @@ class FavoriteCreateSerializer(serializers.ModelSerializer):
         validate_create_serializer(user, data, Favorite, context)
         return data
 
-    def create(self, validated_data):
-        return Favorite.objects.create(**validated_data)
-
     def to_representation(self, instance):
         return RecipeShortSerializer(instance.recipe,
                                      context=self.context).data
 
 
 class ShoppingListCreateSerializer(serializers.ModelSerializer):
-    user = serializers.PrimaryKeyRelatedField(read_only=True)
-    recipe = serializers.PrimaryKeyRelatedField(queryset=Recipe.objects.all())
 
     class Meta:
         model = ShoppingList
@@ -359,27 +351,6 @@ class ShoppingListCreateSerializer(serializers.ModelSerializer):
         validate_create_serializer(user, data, ShoppingList, context)
         return data
 
-    def create(self, validated_data):
-        return ShoppingList.objects.create(**validated_data)
-
     def to_representation(self, instance):
         return RecipeShortSerializer(instance.recipe,
                                      context=self.context).data
-
-
-class FavoriteRecipeSerializer(serializers.ModelSerializer):
-    """Сериализатор для получения рецепта из избранного."""
-
-    class Meta:
-        model = Recipe
-        fields = (
-            'id',
-            'name',
-            'image',
-            'cooking_time'
-        )
-        read_only_fields = (
-            'name',
-            'image',
-            'cooking_time'
-        )
