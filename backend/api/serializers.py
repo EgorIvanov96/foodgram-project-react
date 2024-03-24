@@ -4,14 +4,11 @@ from django.core.validators import MinValueValidator
 from djoser.serializers import UserCreateSerializer, UserSerializer
 from drf_base64.fields import Base64ImageField
 from rest_framework import serializers
-# from django.core.exceptions import ValidationError
 from reviews.models import (Favorite, Ingredient, Recipe, IngredientRecipes,
                             ShoppingList, Tag)
 from users.models import Follow, User
 
 from .utils import subscribed_check, validate_create_serializer
-
-# validate_create_serializer
 
 
 class TagSerializer(UserSerializer):
@@ -335,8 +332,8 @@ class FavoriteCreateSerializer(serializers.ModelSerializer):
         return data
 
     def to_representation(self, instance):
-        return RecipeShortSerializer(instance.recipe,
-                                     context=self.context).data
+        return RecipeShortSerializer(
+            instance.recipe, context=self.context).data
 
 
 class ShoppingListCreateSerializer(serializers.ModelSerializer):
@@ -352,5 +349,5 @@ class ShoppingListCreateSerializer(serializers.ModelSerializer):
         return data
 
     def to_representation(self, instance):
-        return RecipeShortSerializer(instance.recipe,
-                                     context=self.context).data
+        return RecipeShortSerializer(
+            instance.recipe, context=self.context).data

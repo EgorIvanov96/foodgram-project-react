@@ -8,7 +8,7 @@ from reviews.models import Ingredient
 class Command(BaseCommand):
     def import_ingredients(self):
         with open(
-            '../backend/data/ingredients.csv', encoding='utf-8'
+            './data/ingredients.csv', encoding='utf-8'
         ) as csvfile:
             reader = csv.DictReader(csvfile)
             for row in reader:
@@ -20,4 +20,4 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options):
         self.import_ingredients()
-        self.stdout.write(self.style.SUCCESS('Data imported successfully'))
+        self.stdout.write(self.style.SUCCESS('Данные импортированы'))

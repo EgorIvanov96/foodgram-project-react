@@ -13,12 +13,10 @@ from reviews.models import (Favorite, Ingredient, Recipe, IngredientRecipes,
                             ShoppingList, Tag)
 from users.models import Follow, User
 
-from .serializers import (CustomUserSerializer,
-                          FollowCreateSerializer, FollowSerializer,
-                          IngredientSerializer, RecipeCreateUpdateSerializer,
-                          RecipeListSerializer,
-                          TagSerializer,
-                          FavoriteCreateSerializer,
+from .serializers import (CustomUserSerializer, FollowCreateSerializer,
+                          FollowSerializer, IngredientSerializer,
+                          RecipeCreateUpdateSerializer, RecipeListSerializer,
+                          TagSerializer, FavoriteCreateSerializer,
                           ShoppingListCreateSerializer)
 from .filters import RecipeFilter, IngredientFilter
 
@@ -29,7 +27,6 @@ class CustomPaginator(pagination.PageNumberPagination):
 
 class UserCustomViewSet(UserViewSet):
     queryset = User.objects.all()
-    permission_classes = (IsAuthenticatedOrReadOnly,)
     pagination_class = CustomPaginator
     serializer_class = CustomUserSerializer
 
