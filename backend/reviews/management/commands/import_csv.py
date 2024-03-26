@@ -7,15 +7,11 @@ from reviews.models import Ingredient
 
 class Command(BaseCommand):
     def import_ingredients(self):
-        with open(
-            './data/ingredients.csv', encoding='utf-8'
-        ) as csvfile:
-            reader = csv.DictReader(csvfile)
+        with open('./data/ingredients.csv', encoding='utf-8') as csvfile:
+            reader = csv.reader(csvfile)
             for row in reader:
-                name = row['name']
-                measurement_unit = row['measurement_unit']
                 Ingredient.objects.create(
-                    name=name, measurement_unit=measurement_unit
+                    name=row[0], measurement_unit=row[1]
                 )
 
     def handle(self, *args, **options):

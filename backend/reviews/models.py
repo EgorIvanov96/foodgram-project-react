@@ -1,12 +1,13 @@
 from typing import Optional
 
 from django.db import models
+from django.core.validators import MinValueValidator
 
 from users.models import User
 
 
 class Tag(models.Model):
-    """Тег"""
+    """Теги."""
 
     name = models.CharField(max_length=200,
                             verbose_name='Тег',
@@ -91,9 +92,13 @@ class Recipe(models.Model):
                                   related_name='recipes',
                                   verbose_name='Теги',
                                   help_text='Выберите теги')
-    cooking_time = models.IntegerField(verbose_name='Время приготовления(мин)',
-                                       blank=False,
-                                       help_text='Время приготовления')
+    cooking_time = models.IntegerField(
+        verbose_name='Время приготовления(мин)',
+        blank=False,
+        help_text='Время приготовления',
+        validators=[MinValueValidator(
+            1, 'Время приготовления должно быть больше 1 мин.')]
+    )
     objects = RecipeQuerySet.as_manager()
     pub_date = models.DateTimeField(verbose_name='Дата публикации',
                                     auto_now_add=True)
@@ -110,8 +115,13 @@ class Recipe(models.Model):
 
 class IngredientRecipes(models.Model):
     """Связь между ингредиентами и рецептами."""
-    amount = models.PositiveSmallIntegerField(blank=False,
-                                              verbose_name='Количество')
+    amount = models.PositiveSmallIntegerField(
+        blank=False,
+        verbose_name='Количество',
+        validators=[MinValueValidator(
+            1, 'Количество ингредиентов должно быть больше 0.'
+        )]
+    )
     ingredient = models.ForeignKey(Ingredient,
                                    verbose_name='Ингредиент',
                                    on_delete=models.CASCADE,

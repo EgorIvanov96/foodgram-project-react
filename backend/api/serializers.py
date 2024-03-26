@@ -11,24 +11,8 @@ from users.models import Follow, User
 from .utils import subscribed_check, validate_create_serializer
 
 
-class TagSerializer(UserSerializer):
-    class Meta:
-        model = Tag
-        fields = (
-            'id',
-            'name',
-            'color',
-            'slug'
-        )
-
-
-class IngredientSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Ingredient
-        fields = '__all__'
-
-
-class CustomUserSerializer(serializers.ModelSerializer):
+class CustomUserSerializer(UserSerializer):
+    "Сериализатор модели пользователя."
     is_subscribed = serializers.SerializerMethodField(read_only=True)
 
     class Meta:
@@ -48,6 +32,7 @@ class CustomUserSerializer(serializers.ModelSerializer):
 
 
 class CustomUserCreateSerializer(UserCreateSerializer):
+    "Сериализатор создания нового пользователя."
     class Meta:
         model = User
         fields = (
@@ -73,6 +58,25 @@ class CustomUserCreateSerializer(UserCreateSerializer):
         return data
 
 
+class TagSerializer(serializers.ModelSerializer):
+    "Сериализатор модели тегов."
+    class Meta:
+        model = Tag
+        fields = (
+            'id',
+            'name',
+            'color',
+            'slug'
+        )
+
+
+class IngredientSerializer(serializers.ModelSerializer):
+    "Сериализатор модели ингредиентов."
+    class Meta:
+        model = Ingredient
+        fields = '__all__'
+
+
 class RecipeIngredientSerializer(serializers.ModelSerializer):
     name = serializers.StringRelatedField(
         source='ingredient.name'
@@ -92,6 +96,7 @@ class RecipeIngredientSerializer(serializers.ModelSerializer):
 
 
 class RecipeListSerializer(serializers.ModelSerializer):
+    "Сериализатор модели рецептов."
     ingredients = RecipeIngredientSerializer(
         source='recipe_ingredients', many=True
     )
@@ -132,6 +137,7 @@ class RecipeListSerializer(serializers.ModelSerializer):
 
 
 class IngredientCreateInRecipeSerializer(serializers.ModelSerializer):
+    "Сериализатор для добавления ингредиентов в рецепт и кол-во."
     id = serializers.IntegerField()
     amount = serializers.IntegerField(
         write_only=True,
@@ -144,6 +150,7 @@ class IngredientCreateInRecipeSerializer(serializers.ModelSerializer):
 
 
 class RecipeCreateUpdateSerializer(serializers.ModelSerializer):
+    "Сериализатор для создания и обновления рецептов."
     ingredients = IngredientCreateInRecipeSerializer(many=True)
     image = Base64ImageField()
     author = CustomUserSerializer(read_only=True)
@@ -213,10 +220,9 @@ class RecipeCreateUpdateSerializer(serializers.ModelSerializer):
         )
 
     def create(self, validated_data):
-        author = self.context['request'].user
         tags = validated_data.pop('tags')
         ingredients_data = validated_data.pop('ingredients')
-        recipe = Recipe.objects.create(author=author, **validated_data)
+        recipe = Recipe.objects.create(**validated_data)
         recipe.tags.set(tags)
         self.recipe_ingredient_create(ingredients_data, recipe)
         return recipe
@@ -238,6 +244,7 @@ class RecipeCreateUpdateSerializer(serializers.ModelSerializer):
 
 
 class RecipeShortSerializer(serializers.ModelSerializer):
+    "Сериализатор для рецептов."
     image = Base64ImageField(required=True)
 
     class Meta:
@@ -251,6 +258,7 @@ class RecipeShortSerializer(serializers.ModelSerializer):
 
 
 class FollowSerializer(serializers.ModelSerializer):
+    "Сериализатор для отображения подписок."
     recipes = serializers.SerializerMethodField(read_only=True)
     recipes_count = serializers.SerializerMethodField(read_only=True)
     is_subscribed = serializers.SerializerMethodField(read_only=True)
@@ -288,6 +296,7 @@ class FollowSerializer(serializers.ModelSerializer):
 
 
 class FollowCreateSerializer(serializers.ModelSerializer):
+    "Сериализатор для создания подписок."
     user = serializers.SlugRelatedField(
         slug_field='id',
         queryset=User.objects.all()
@@ -320,6 +329,7 @@ class FollowCreateSerializer(serializers.ModelSerializer):
 
 
 class FavoriteCreateSerializer(serializers.ModelSerializer):
+    "Сериализатор модели избранное."
 
     class Meta:
         model = Favorite
@@ -337,6 +347,7 @@ class FavoriteCreateSerializer(serializers.ModelSerializer):
 
 
 class ShoppingListCreateSerializer(serializers.ModelSerializer):
+    "Сериализатор модели список покупок."
 
     class Meta:
         model = ShoppingList
