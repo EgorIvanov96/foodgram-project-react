@@ -8,8 +8,6 @@ class User(AbstractUser):
     email = models.EmailField(max_length=254, unique=True,
                               verbose_name='e-mail',
                               help_text='Укажите свой e-mail')
-    USERNAME_FIELD = 'email'
-    REQUIRED_FIELDS = ['username']
     username = models.CharField(max_length=150, blank=True,
                                 verbose_name='Никнейм пользователя',
                                 help_text='Укажите никнейм')
@@ -19,6 +17,8 @@ class User(AbstractUser):
     last_name = models.CharField(max_length=150, blank=True,
                                  verbose_name='Фамилия пользователя',
                                  help_text='Укажите фамилию пользователя')
+    USERNAME_FIELD = 'email'
+    REQUIRED_FIELDS = ['username', 'first_name', 'last_name']
 
     class Meta:
         verbose_name = 'Пользователь'
