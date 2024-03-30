@@ -6,15 +6,17 @@ from reviews.models import Recipe, Ingredient, Tag
 
 class IngredientFilter(FilterSet):
     """Фильтр по ингредиентам."""
+
     name = filters.CharFilter(field_name='name', lookup_expr='startswith')
 
     class Meta:
         model = Ingredient
-        fields = ['name']
+        fields = ('name',)
 
 
 class RecipeFilter(FilterSet):
-    "Фильтр по тега, авторам, избранном и спискам покупок."
+    """"Фильтр по тега, авторам, избранном и спискам покупок."""
+
     tags = filters.ModelMultipleChoiceFilter(
         field_name='tags__slug',
         to_field_name='slug',
