@@ -169,7 +169,7 @@ class RecipeViewSet(viewsets.ModelViewSet):
 
     @staticmethod
     def creating_shopping_list(ingredients):
-        purchased = ['Список покупок:',]
+        purchased = 'Список покупок:'
         for item in ingredients:
             purchased.append(
                 f"{item['ingredient__name']}: {item['amount_of_item']}, "

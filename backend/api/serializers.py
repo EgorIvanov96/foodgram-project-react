@@ -282,9 +282,6 @@ class FollowSerializer(CustomUserSerializer):
             recipes = recipes[:int(recipes_limit)]
         return RecipeShortSerializer(recipes, many=True).data
 
-    """def get_recipes_count(self, instance):
-        return Recipe.objects.filter(author__id=instance.id).count()"""
-
 
 class FollowCreateSerializer(serializers.ModelSerializer):
     """Сериализатор для создания подписок."""
