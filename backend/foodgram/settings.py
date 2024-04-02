@@ -64,7 +64,6 @@ TEMPLATES = [
 WSGI_APPLICATION = 'foodgram.wsgi.application'
 
 
-# Для локального запуска
 SQLITE = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',

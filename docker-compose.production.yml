@@ -32,7 +32,7 @@ services:
       - 8000:80
     volumes:
       - static_volume:/staticfiles/
-      - ./docs/:/staticfiles/api/docs/
+      - ./docs/:/usr/share/nginx/html/api/docs/
       - media_volume:/app/media/
     depends_on:
       - backend
