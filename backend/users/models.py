@@ -1,35 +1,42 @@
 from django.contrib.auth.models import AbstractUser
 from django.db import models
 from django.db.models import F, Q
+from django.core.validators import RegexValidator
 
-from .constants import MAX_LENGTH, MIN_LENGHT
+from .constants import MAX_LENGTH_EMAIL, LENGHT_FIELDS
 
 
 class User(AbstractUser):
     """Модель пользоветеля."""
 
     USERNAME_FIELD = 'email'
-    REQUIRED_FIELDS = ['username', 'first_name', 'last_name']
+    REQUIRED_FIELDS = ('username', 'first_name', 'last_name')
     email = models.EmailField(
-        max_length=MAX_LENGTH, unique=True,
+        max_length=MAX_LENGTH_EMAIL, unique=True,
         verbose_name='e-mail',
         help_text='Укажите свой e-mail')
     username = models.CharField(
-        max_length=MIN_LENGHT, blank=True,
+        max_length=LENGHT_FIELDS,
         verbose_name='Никнейм пользователя',
-        help_text='Укажите никнейм')
+        help_text='Укажите никнейм',
+        validators=[
+            RegexValidator(
+                r'^[\w.@+-]+\Z',
+                'Поле username содержит недопустимые символы.'
+            )])
     first_name = models.CharField(
-        max_length=MIN_LENGHT, blank=True,
+        max_length=LENGHT_FIELDS, blank=True,
         verbose_name='Имя пользователя',
         help_text='Укажите имя пользователя')
     last_name = models.CharField(
-        max_length=MIN_LENGHT, blank=True,
+        max_length=LENGHT_FIELDS, blank=True,
         verbose_name='Фамилия пользователя',
         help_text='Укажите фамилию пользователя')
 
     class Meta:
         verbose_name = 'Пользователь'
         verbose_name_plural = 'пользователи'
+        ordering = ['username']
 
     def __str__(self):
         return self.username

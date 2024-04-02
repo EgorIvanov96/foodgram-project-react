@@ -1,11 +1,8 @@
-from typing import Optional
-
 from django.db import models
 from django.core.validators import MinValueValidator, MaxValueValidator
 from colorfield.fields import ColorField
 
 from users.models import User
-
 from .constants import (
     MEDIUM_LENGTH, MAX_COLOR, MIN, MAX
 )
@@ -59,18 +56,6 @@ class Ingredient(models.Model):
         return self.name
 
 
-class RecipeQuerySet(models.QuerySet):
-
-    def add_user_annotations(self, user_id: Optional[int]):
-        return self.annotate(
-            is_favorited=models.Exists(
-                Favorite.objects.filter(
-                    user_id=user_id, recipe__pk=models.OuterRef('pk')
-                )
-            ),
-        )
-
-
 class Recipe(models.Model):
     """Рецепты."""
 
@@ -108,14 +93,13 @@ class Recipe(models.Model):
         help_text='Время приготовления',
         validators=[
             MinValueValidator(
-                MIN, 'Время приготовления должно быть больше 1 мин.'
+                MIN, f'Время приготовления должно быть больше {MIN} мин.'
             ),
             MaxValueValidator(
-                MAX, 'Время приготовления должно быть меньше 32000 мин.'
+                MAX, f'Время приготовления должно быть меньше {MAX} мин.'
             )
         ]
     )
-    objects = RecipeQuerySet.as_manager()
     pub_date = models.DateTimeField(
         verbose_name='Дата публикации',
         auto_now_add=True)
@@ -142,10 +126,10 @@ class IngredientRecipes(models.Model):
         verbose_name='Количество',
         validators=[
             MinValueValidator(
-                MIN, 'Количество ингредиентов должно быть больше 0.'
+                MIN, f'Количество ингредиентов должно быть больше {MIN}.'
             ),
             MaxValueValidator(
-                MAX, 'Количество ингредиентов должно быть меньше 32000.'
+                MAX, f'Количество ингредиентов должно быть меньше {MAX}.'
             )
         ]
     )
@@ -184,14 +168,13 @@ class RecipUserBase(models.Model):
     recipe = models.ForeignKey(
         Recipe,
         on_delete=models.CASCADE,
-        null=True,
         verbose_name='Рецепты')
 
     class Meta:
         abstract = True
 
     def __str__(self):
-        return f'{self.user} {self.recipe}'
+        return f'{self.recipe} {self._meta.verbose_name} у {self.user}'
 
 
 class Favorite(RecipUserBase):
@@ -208,12 +191,9 @@ class Favorite(RecipUserBase):
             ),
         ]
 
-    def __str__(self):
-        return f'{self.recipe} в избранном у {self.user}'
-
 
 class ShoppingList(RecipUserBase):
-    "Список покупок."
+    """Список покупок."""
 
     class Meta:
         verbose_name = 'Список покупок'
@@ -225,6 +205,3 @@ class ShoppingList(RecipUserBase):
                 name='unique_recipe'
             ),
         ]
-
-    def __str__(self):
-        return f'Корзина пользователя {self.user}'

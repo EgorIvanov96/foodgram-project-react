@@ -1,18 +1,17 @@
 from django.db.models import Sum, Count
 from django.http import FileResponse
-from django.shortcuts import get_object_or_404
 from django_filters.rest_framework import DjangoFilterBackend
 from djoser.views import UserViewSet
 from rest_framework import status, viewsets
 from rest_framework.decorators import action
-from rest_framework.permissions import (AllowAny, IsAuthenticated)
+from rest_framework.permissions import (AllowAny, IsAuthenticated,
+                                        SAFE_METHODS)
 from rest_framework.response import Response
 
 from reviews.models import (Favorite, Ingredient, Recipe, IngredientRecipes,
                             ShoppingList, Tag)
-
 from users.models import Follow, User
-from .serializers import (CustomUserSerializer, FollowCreateSerializer,
+from .serializers import (UserSerializer, FollowCreateSerializer,
                           FollowSerializer, IngredientSerializer,
                           RecipeCreateUpdateSerializer, RecipeListSerializer,
                           TagSerializer, FavoriteCreateSerializer,
@@ -27,7 +26,7 @@ class UserCustomViewSet(UserViewSet):
 
     queryset = User.objects.all()
     pagination_class = Paginator
-    serializer_class = CustomUserSerializer
+    serializer_class = UserSerializer
 
     def get_permissions(self):
         if self.action in ('me', 'subscriptions', 'subscribe'):
@@ -44,7 +43,7 @@ class UserCustomViewSet(UserViewSet):
         following_users = User.objects.filter(
             following__user=self.request.user
         ).annotate(
-            recipes_count=Count("recipes"))
+            recipes_count=Count('recipes'))
         paginated_queryset = self.paginate_queryset(following_users)
         serializer = FollowSerializer(
             paginated_queryset,
@@ -77,14 +76,11 @@ class UserCustomViewSet(UserViewSet):
         )
 
     @subscribe.mapping.delete
-    def delete_subscribe(self, request, **kwargs):
-        author_id = self.kwargs.get('id')
-        author = get_object_or_404(User, id=author_id)
-
-        if Follow.objects.filter(user=request.user,
-                                 author=author).exists():
-            Follow.objects.filter(user=request.user,
-                                  author=author).delete()
+    def delete_subscribe(self, request, id):
+        follow_instance = Follow.objects.filter(
+            user=request.user, author=id).first()
+        if follow_instance:
+            follow_instance.delete()
             return Response(status=status.HTTP_204_NO_CONTENT)
         return Response(status=status.HTTP_400_BAD_REQUEST)
 
@@ -120,7 +116,7 @@ class RecipeViewSet(viewsets.ModelViewSet):
     filterset_class = RecipeFilter
 
     def get_serializer_class(self):
-        if self.request.method == 'GET':
+        if self.request.method in SAFE_METHODS:
             return RecipeListSerializer
         return RecipeCreateUpdateSerializer
 
@@ -135,13 +131,13 @@ class RecipeViewSet(viewsets.ModelViewSet):
         return Response(serializer.data, status=status.HTTP_201_CREATED)
 
     @staticmethod
-    def delete_recipes(request, model, **kwargs):
+    def delete_recipes(request, model, pk):
         """Статический метод для DELETE запроса."""
-        recipe = get_object_or_404(Recipe, id=kwargs.get('pk'))
-        if model.objects.filter(user=request.user,
-                                recipe=recipe).exists():
-            model.objects.filter(user=request.user,
-                                 recipe=recipe).delete()
+
+        delete_instanse = model.objects.filter(user=request.user,
+                                               recipe=pk).first()
+        if delete_instanse:
+            delete_instanse.delete()
             return Response(status=status.HTTP_204_NO_CONTENT)
         return Response(status=status.HTTP_400_BAD_REQUEST)
 
@@ -169,7 +165,7 @@ class RecipeViewSet(viewsets.ModelViewSet):
 
     @staticmethod
     def creating_shopping_list(ingredients):
-        purchased = 'Список покупок:'
+        purchased = ['Список покупок:', ]
         for item in ingredients:
             purchased.append(
                 f"{item['ingredient__name']}: {item['amount_of_item']}, "
@@ -187,7 +183,7 @@ class RecipeViewSet(viewsets.ModelViewSet):
         ingredients = IngredientRecipes.objects.filter(
             recipe__shopping_list__user=self.request.user).values(
             'ingredient__name', 'ingredient__measurement_unit').annotate(
-            amount_of_item=Sum('amount'))
+            amount_of_item=Sum('amount')).order_by('ingredient__name')
         purchased_list = self.creating_shopping_list(ingredients)
         response = FileResponse(purchased_list, content_type="text/plain")
         response['Content-Disposition'] = (

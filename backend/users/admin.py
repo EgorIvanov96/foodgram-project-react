@@ -3,7 +3,6 @@ from django.contrib.auth.admin import UserAdmin
 from django.contrib.auth.models import Group
 
 from reviews.models import Recipe
-
 from .models import Follow, User
 
 
