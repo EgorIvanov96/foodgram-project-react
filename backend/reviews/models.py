@@ -3,6 +3,7 @@ from django.core.validators import MinValueValidator, MaxValueValidator
 from colorfield.fields import ColorField
 
 from users.models import User
+
 from .constants import (
     MEDIUM_LENGTH, MAX_COLOR, MIN, MAX
 )
