@@ -1,4 +1,3 @@
-from djoser.serializers import UserSerializer
 from drf_base64.fields import Base64ImageField
 from rest_framework.validators import UniqueTogetherValidator
 from rest_framework import serializers
